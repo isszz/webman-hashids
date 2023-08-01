@@ -1,0 +1,36 @@
+{
+    "name": "isszz/webman-hashids",
+    "description": "Webman Hashids Used to generate a youtube-like ID from a digital ID",
+    "keywords": [
+        "webman",
+        "hashids",
+        "YouTube ID",
+        "Bilibili BV"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "isszz",
+            "email": "isszz@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.0.0",
+        "hashids/hashids": "^4.1.0",
+        "workerman/webman-framework": ">=1.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "isszz\\hashids\\": "src"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "dev-dev"
+        }
+    }
+}
