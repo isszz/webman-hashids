@@ -50,7 +50,7 @@ return [
 ```
 
 ## 用法
-依赖注入方式-推荐
+依赖注入方式
 
 ```php
 use isszz\hashids\Hashids;
@@ -143,5 +143,46 @@ class Index
 }
 
 ```
+使用ThinkORM获取器对ID进行加密
+```php
+public function getIdAttr($value)
+{
+    return id_encode($value);
+}
 
+// 主键非id时, 比如是tid时
+public function getTidAttr($value)
+{
+    return id_encode($value);
+}
+
+```
+使用Laravel Eloquent ORM访问器对ID进行加密
+```php
+// 10.x版本
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+    protected function id(): Attribute
+    {
+        return Attribute::make(
+            get: fn (int $value) => id_encode($value),
+        );
+    }
+}
+
+// 8.x版本
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+    public function getIdAttribute($value)
+    {
+        return id_encode($value);
+    }
+}
+
+```
 - 基础库来自: [vinkla/hashids](https://github.com/vinkla/hashids)
