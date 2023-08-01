@@ -32,6 +32,7 @@ return [
         'main' => [
             'salt' => '',
             'length' => 0,
+            'alphabet' => 'oqyei4pYnjDLXuPOw6c9IvzlWUmBs1Z0rdAkFCKM8hgHb2QV7NJ35TfaxRtESGArray'
         ],
         'other' => [
             'salt' => 'salt',
@@ -39,8 +40,9 @@ return [
             'alphabet' => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
         ],
         'bilibili' => [
-            // 可配置前缀为: ['B', 'V']或者'BV'，超过2位忽略
-            'prefix' => ['', ''], // B站BV模式前缀类似: BV1fx411v7eo = 12345678
+            // 此模式无需添加其他的配置
+            // 前缀超过2位英文字母忽略
+            'prefix' => '', // B站BV模式前缀类似: BV1fx411v7eo = 12345678
         ],
     ],
 ];
@@ -69,6 +71,21 @@ class Index
         // 默认
         $hashids->encode(12345678); // 1rQ2go
         $hashids->decode('1rQ2go'); // 12345678
+
+        // 其他传输ID的方式，返回为数组，对应传参
+        $hashID = $hashids->encode(12, 34, 56, 78); // nyILSjosbR
+        $hashID2 = $hashids->encode([12, 34, 56, 78]); // nyILSjosbR
+        
+        $result = $hashids->decode($hashID);
+        // 返回数组
+        /*
+        $result = [
+            '0' => 12
+            '1' => 34
+            '2' => 56
+            '3' => 78
+        ];
+        */ 
     }
 }
 
@@ -100,5 +117,31 @@ class Index
 
 
 ```
+助手函数
+```php
+class Index
+{
+    public function index()
+    {
+        // 加密
+        id_encode(12345678); // 1rQ2go
+        id_encode(12, 34, 56, 78, 'other'); // nyILSjosbR
+        id_encode([12, 34, 56, 78], mode: 'other'); // nyILSjosbR
 
-- 查看更多用法: [vinkla/hashids](https://github.com/vinkla/hashids)
+        // 解密
+        id_decode('1rQ2go'); // 12345678
+        id_decode('gpyAoR', 'other'); // 12345678
+
+        // 切换模式
+        id_mode('other')->encode(12345678); // gpyAoR
+        id_mode('other')->decode('gpyAoR'); // 12345678
+
+        // 助手函数还有一个获取字母表的函数
+        // 拿到可以用来设置`config/plugin/isszz/webman-hashids/app.php `配置中的alphabet字段
+        $alphabet = id_build_alphabet();
+    }
+}
+
+```
+
+- 基础库来自: [vinkla/hashids](https://github.com/vinkla/hashids)

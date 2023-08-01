@@ -18,8 +18,9 @@ return [
             'alphabet' => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
         ],
         'bilibili' => [
-            // 可配置前缀为: ['B', 'V']或者'BV'，超过2位忽略
-            'prefix' => ['', ''], // B站BV模式前缀类似: BV1fx411v7eo = 12345678
+            // 此模式无需添加其他的配置
+            // 前缀超过2位英文字母忽略
+            'prefix' => '', // B站BV模式前缀类似: BV1fx411v7eo = 12345678
         ],
     ],
 ];
