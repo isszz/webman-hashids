@@ -3,8 +3,6 @@ declare (strict_types = 1);
 
 namespace isszz\hashids;
 
-use Hashids\Hashids as HashidsParent;
-
 class Hashids
 {
 	/**
