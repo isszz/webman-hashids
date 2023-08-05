@@ -214,7 +214,7 @@ class Hashid implements MiddlewareInterface
             $route->setParams($parameters);
         }
 
-        // POST + GET 用data传值，因官方没有对参数进行二次修改的方法只有这样啦，不给也挺好用的
+        // POST + GET 用data传值，因官方没有对参数进行二次修改的方法只有这样啦，不过也挺好用的
         $parameters = $request->all();
         if ($parameters && count($parameters) > 0) {
             foreach ($parameters as $k => $v) {
