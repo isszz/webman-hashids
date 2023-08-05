@@ -185,4 +185,182 @@ class User extends Model
 }
 
 ```
+### Request请求中的使用案例
+
+**新建一个路由中间件，在需要的路由引入，不需要解密的路由不建议引入**
+
+```php
+<?php
+namespace app\middleware;
+
+use Webman\MiddlewareInterface;
+use Webman\Http\Response;
+use Webman\Http\Request;
+
+class Hashid implements MiddlewareInterface
+{
+    public function process(Request $request, callable $next): Response
+    {
+        $parameters = [];
+        $route = $request->route;
+
+        if ($route) {
+            $parameters = $route->param() ?: [];
+
+            foreach ($parameters as $k => $v) {
+                $parameters[$k] = $this->decodeParam($v) ?: $v;
+            }
+
+            $route->setParams($parameters);
+        }
+
+        // POST + GET 用data传值，因官方没有对参数进行二次修改的方法只有这样啦，不给也挺好用的
+        $parameters = $request->all();
+        if ($parameters && count($parameters) > 0) {
+            foreach ($parameters as $k => $v) {
+                $parameters[$k] = $this->decodeParam($v) ?: $v;
+            }
+
+            $request->data = $parameters;
+        }
+
+        return $next($request);
+    }
+
+
+    private function decodeParam($value)
+    {
+        if (!preg_match("/^[0-9a-zA-Z@]+$/", $value)) {
+            return null;
+        }
+
+        // 切换模式
+        if (str_contains($value, '@')) {
+            [$value, $type] = explode('@', $value);
+        }
+
+        try {
+            return id_decode($value, $type ?? '') ?: null;
+        } catch(\Exception $e) {}
+
+        return null;
+    }
+}
+
+
+```
+**修改`support\Request.php`增加如下方法**
+```php
+class Request extends \Webman\Http\Request
+{
+    /**
+     * 获取中间件中，以data参数传递的get或者post参数，通常此方法获取的是经过中间件处理后的参数
+     * 
+     * @param string|array|null $name
+     * @param mixed $default
+     * @return mixed|null
+     */
+    public function data(string|array|null $name = null, $default = null)
+    {
+        $data = $this->data ?: [];
+
+        if(is_null($name)) {
+            return $data;
+        }
+
+        $result = [];
+        if(is_array($name) && count($data) > 0) {
+            foreach ($name as $key => $val) {
+
+                if (is_int($key)) {
+                    $default = null;
+                    $key = $val;
+                    if (!key_exists($key, $data)) {
+                        continue;
+                    }
+                } else {
+                    $default = $val;
+                }
+
+                $result[$key] = $data[$key] ?? $default;
+            }
+
+            return $result;
+        }
+
+        return $data[$name] ?? $default;
+    }
+            
+     
+
+    /**
+     * 从路由中获取参数
+     * 
+     * @param string|array|null $name
+     * @param mixed $default
+     * @return mixed|null
+     */
+    public function route(string|array|null $name = null, $default = null)
+    {
+        $data = $this->route->param() ?: [];
+
+        if(is_null($name)) {
+            return $data;
+        }
+
+        $result = [];
+        if(is_array($name) && count($data) > 0) {
+            foreach ($name as $key => $val) {
+
+                if (is_int($key)) {
+                    $default = null;
+                    $key = $val;
+                    if (!key_exists($key, $data)) {
+                        continue;
+                    }
+                } else {
+                    $default = $val;
+                }
+
+                $result[$key] = $data[$key] ?? $default;
+            }
+
+            return $result;
+        }
+
+        return $data[$name] ?? $default;
+    }
+}
+
+```
+**控制器中使用例如**
+```php
+class TestController
+{
+    public function index(Request $request)
+    {
+        // 正常的参数传递
+        // /test?id=1rQ2go&uid=daVBjxW@other
+        $request->data(['uid', 'id']);
+        $request->data('id');
+        $request->data('uid');
+
+        // 使用路由定义的参数
+        // /test/{id}/user/{uid}
+        // 官方的方法可以这样一次一个参数拿
+        $request->route->param('uid');
+
+        // 我们有对request增加一些方法比如，这样可以批量拿
+        [$uid, $id] = $request->route(['uid', 'id']);
+
+        // 也可以
+        $uid = $request->route('uid', null);
+
+        // 其中参数中以@分割，前面是要解析的参数，后面的是以那种模式解析
+        return 'end';
+
+    }
+}
+
+```
 - 基础库来自: [vinkla/hashids](https://github.com/vinkla/hashids)
