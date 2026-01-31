@@ -88,7 +88,7 @@ class Hashids
 	 * @throws \isszz\hashids\HashidsException
 	 * @return array
 	 */
-	protected function getModeConfig(string $name = null): array
+	protected function getModeConfig(?string $name): array
 	{
 		$name = $name ?: $this->getDefaultMode();
 		$config = $this->config['modes'][$name] ?? [];
